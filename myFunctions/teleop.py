@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 # -*- encoding: UTF-8 -*-
 
-#TODO - Head orientation could be controlled through mouse
-#TODO - Camera/IR Sensor monitor for operator
 
 import qi
 import argparse
@@ -13,12 +11,18 @@ import time
 import os
 import pygame
 
+# Modes 'keyboard' 'dualshock' 
+
+Mode = 'dualshock'
 
 pygame.init()
-display = pygame.display.set_mode((300, 300))
+pygame.joystick.init()
+controller = pygame.joystick.Joystick(0)
+controller.init()
+
 
 v_x = 0.2
-v_theta = 0.8
+v_theta = 1
 
 
 def main(session):
@@ -41,7 +45,11 @@ def main(session):
     awareness_service.setTrackingMode("Head")  
 
     while 1:
-        InputWasd(motion_service, posture_service)
+        if Mode == 'dualshock':
+            joyaxis(motion_service)
+        elif Mode == 'keyboard':
+            InputWasd(motion_service, posture_service)
+
 
 
 def MotionMapping_x(motion_service, command_x):
@@ -53,7 +61,7 @@ def MotionMapping_theta(motion_service, command_theta):
     motion_service.move(0, 0, command_theta)
 
 def InputWasd(motion_service, posture_service):
-ww
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -84,9 +92,15 @@ ww
                 #posture_service.goToPosture("Stand", 0.5)
                 motion_service.wakeUp()
 
-1
 
-
+def joyaxis(motion_service):
+    for event in pygame.event.get():
+        if event.type == pygame.JOYAXISMOTION:
+            #axis[event.axis] = round(event.value,2)
+            command_theta = controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX)
+            command_x = controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY)
+            MotionMapping_x(motion_service, -command_x)
+            MotionMapping_theta(motion_service, -command_theta)
 
 
 if __name__ == "__main__":
