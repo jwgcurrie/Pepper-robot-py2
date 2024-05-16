@@ -1,0 +1,50 @@
+name: Pepper
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ca-certificates=2018.4.16=0
+  - certifi=2018.4.16=py27_0
+  - pip=20.1.1=pyh9f0ad1d_0
+  - python=2.7.14=5
+  - setuptools=39.0.1=py27_0
+  - sqlite=3.22.0=vc9_0
+  - vc=9=h2eaa2aa_6
+  - vs2008_runtime=9.0.30729.6161=0
+  - wheel=0.37.1=pyhd8ed1ab_0
+  - wincertstore=0.2=pyhd8ed1ab_1009
+  - pip:
+      - backports-functools-lru-cache==1.6.6
+      - bcrypt==3.1.7
+      - cffi==1.15.1
+      - chardet==4.0.0
+      - cryptography==3.3.2
+      - cycler==0.10.0
+      - datetime==4.9
+      - enum34==1.1.10
+      - future==0.18.3
+      - idna==2.10
+      - ipaddress==1.0.23
+      - iso8601==0.1.16
+      - kiwisolver==1.1.0
+      - matplotlib==2.2.5
+      - numpy==1.16.6
+      - pandas==0.24.2
+      - paramiko==2.12.0
+      - pathtools==0.1.2
+      - pillow==6.2.2
+      - pycparser==2.21
+      - pygame==2.0.3
+      - pynacl==1.4.0
+      - pynput==1.7.6
+      - pyparsing==2.4.7
+      - pyserial==3.5
+      - python-dateutil==2.9.0.post0
+      - pytz==2024.1
+      - pyyaml==5.4.1
+      - requests==2.27.1
+      - six==1.16.0
+      - speechrecognition==3.9.0
+      - urllib3==1.26.16
+      - zope-interface==5.5.2
+prefix: C:\Users\r04jc22\Anaconda3\envs\Pepper
