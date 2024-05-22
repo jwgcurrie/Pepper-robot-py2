@@ -14,15 +14,18 @@ import pygame
 # Modes 'keyboard' 'dualshock' 
 
 Mode = 'dualshock'
+Effectors = ['Move', 'Head']
+
 
 pygame.init()
 pygame.joystick.init()
 controller = pygame.joystick.Joystick(0)
 controller.init()
 
-
-v_x = 0.2
-v_theta = 1
+Controller_square_button_state = 0
+v_x = 0.15
+v_theta = 0.5
+joint_speed_frac = 0.1
 
 
 def main(session):
@@ -38,27 +41,63 @@ def main(session):
 
     # Wake up robot
     motion_service.wakeUp()
+    motion_service.setTangentialSecurityDistance(0.05)
+    motion_service.setOrthogonalSecurityDistance(0.2)
 
     # Send robot to Stand Init
     posture_service.goToPosture("StandInit", 0.5)
     awareness_service.setEnabled(True)
     awareness_service.setTrackingMode("Head")  
 
+    
+
     while 1:
         if Mode == 'dualshock':
-            joyaxis(motion_service)
-        elif Mode == 'keyboard':
+            joyaxis(motion_service, Effectors)
+        if Mode == 'keyboard':
             InputWasd(motion_service, posture_service)
 
 
 
-def MotionMapping_x(motion_service, command_x):
-    command_x = command_x * v_x
-    motion_service.move(command_x, 0, 0)
+def MotionMapping(motion_service, effector, Controller_LX, Controller_LY, Controller_RX, Controller_RY):
+    if effector == 'Move':
+        command_x = -round(Controller_LY, 1) * v_x
+        command_theta = -round(Controller_R, 1) * v_theta
+        motion_service.move(command_x, 0, command_theta)
+    elif effector == 'Head':
+        command_yaw = -round(Controller_LX, 1) * 2 # Max value: 2.0857
+        command_pitch = round(Controller_R, 1) * 0.4 # Max Value: 0.4451
+        motion_service.setAngles(['HeadYaw', 'HeadPitch'], [command_yaw, command_pitch], joint_speed_frac) # TODO - bug yaw goes to extreme not obeying speed limits
+    elif effector == 'Move_XY':
+        command_x = -round(Controller_LY, 1) * v_x
+        command_y = -round(Controller_LX, 1) * v_x
+        command_theta = -round(Controller_RY, 1) * v_theta
+        print(command_x, command_y, command_theta)
+        motion_service.move(command_x, command_y, command_theta)
 
-def MotionMapping_theta(motion_service, command_theta):
-    command_theta = command_theta * v_theta
-    motion_service.move(0, 0, command_theta)
+
+
+def joyaxis(motion_service, Effectors):
+    for event in pygame.event.get():
+        # Read button events
+        global Controller_square_button_state
+        Controller_square_button_state = Controller_square_button_state + controller.get_button(2)
+        if Controller_square_button_state > 1:
+            Controller_square_button_state = 0
+
+        # Read joystick axis events
+        Controller_Left_X = controller.get_axis(pygame.CONTROLLER_AXIS_LEFTX)
+        Controller_Left_Y = controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY)
+        Controller_Right_X = controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX)
+        Controller_Right_Y = controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTY)
+
+        effector = Effectors[Controller_square_button_state]
+
+        MotionMapping(motion_service, effector, Controller_Left_X, Controller_Left_Y, Controller_Right_X, Controller_Right_X)
+
+
+
+
 
 def InputWasd(motion_service, posture_service):
 
@@ -91,16 +130,6 @@ def InputWasd(motion_service, posture_service):
             if event.key == pygame.K_1:
                 #posture_service.goToPosture("Stand", 0.5)
                 motion_service.wakeUp()
-
-
-def joyaxis(motion_service):
-    for event in pygame.event.get():
-        if event.type == pygame.JOYAXISMOTION:
-            #axis[event.axis] = round(event.value,2)
-            command_theta = controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX)
-            command_x = controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY)
-            MotionMapping_x(motion_service, -command_x)
-            MotionMapping_theta(motion_service, -command_theta)
 
 
 if __name__ == "__main__":
